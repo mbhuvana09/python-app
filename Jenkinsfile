@@ -26,7 +26,6 @@ pipeline {
         stage('Tag Docker Image') {
             steps {
                 script {
-                    
                     sh "docker tag python-app:latest ${ECR_REPO_URL}:${IMAGE_TAG}"
                 }
             }
@@ -34,8 +33,10 @@ pipeline {
 
         stage('Login to ECR') {
             steps {
-                script {
-                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URL}"
+                withCredentials([aws(credentialsId: 'your-aws-credentials-id', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    script {
+                        sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URL}"
+                    }
                 }
             }
         }
@@ -43,6 +44,7 @@ pipeline {
         stage('Push Docker Image to ECR') {
             steps {
                 script {
+                    // Push the Docker image to ECR
                     sh "docker push ${ECR_REPO_URL}:${IMAGE_TAG}"
                 }
             }
