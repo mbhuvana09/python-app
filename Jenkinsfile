@@ -5,9 +5,13 @@ pipeline {
         AWS_REGION = 'us-east-1'
         ECR_REPO_URL = '044274180134.dkr.ecr.us-east-1.amazonaws.com/python-app'
         IMAGE_TAG = 'latest'
-        ECS_CLUSTER_NAME = 'python-app'         
-        ECS_SERVICE_NAME = 'python-app'         
-        TASK_FAMILY = 'family'                  
+        ECS_CLUSTER_NAME = 'python-app'
+        ECS_SERVICE_NAME = 'python-app'
+        TASK_FAMILY = 'family'
+        CPU_TASK = '256'  // Task level CPU
+        MEMORY_TASK = '512' // Task level Memory
+        CPU_CONTAINER = '256'  // Container level CPU
+        MEMORY_CONTAINER = '512' // Container level Memory
     }
 
     stages {
@@ -61,11 +65,11 @@ pipeline {
                     script {
                         // Register a new task definition for ECS with the updated Docker image
                         sh """
-                        aws ecs register-task-definition --family ${TASK_FAMILY} --network-mode awsvpc --container-definitions '[{
+                        aws ecs register-task-definition --family ${TASK_FAMILY} --network-mode awsvpc --cpu ${CPU_TASK} --memory ${MEMORY_TASK} --container-definitions '[{
                             "name": "python-app",
                             "image": "${ECR_REPO_URL}:${IMAGE_TAG}",
-                            "memory": 512,
-                            "cpu": 256,
+                            "memory": ${MEMORY_CONTAINER},
+                            "cpu": ${CPU_CONTAINER},
                             "essential": true,
                             "portMappings": [{
                                 "containerPort": 80,
